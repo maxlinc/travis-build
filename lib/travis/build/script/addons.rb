@@ -25,13 +25,27 @@ module Travis
         end
 
         def addons
-          @addons ||= (config[:addons] || {}).map do |name, addon_config|
+          @addons ||= addons_config.map do |name, addon_config|
             init_addon(name, addon_config)
           end
         end
 
         def init_addon(name, config)
           MAP[name].new(self, config)
+        end
+
+        def addons_config
+          @_addons_config ||= begin
+                                addons_config = (config[:addons] || {})
+                                if addons_config.is_a?(Array)
+                                  addons_config = addons_config.each_with_object({}) do |addons, collector|
+                                    addons.each do |name, addon_config|
+                                      collector[name] = addon_config
+                                    end
+                                  end
+                                end
+                                addons_config
+                              end
         end
       end
     end

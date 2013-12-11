@@ -28,8 +28,21 @@ describe Travis::Build::Script::Generic do
   it "sets up the hosts file" do
     data["config"]["addons"] = { "hosts" => "johndoe.local" }
 
-    subject
-    store_example "addons_hosts"
+    subject.should include("johndoe.local")
+  end
+
+  it "accepts multiple hosts" do
+    data["config"]["addons"] = { "hosts" => ["johndoe.local", "travis.local"] }
+
+    subject.should include("johndoe.local")
+    subject.should include("travis.local")
+  end
+
+  it "accepts multiple hosts with a list configuration" do
+    data["config"]["addons"] = [{"hosts" => ["johndoe.local", "travis.local"]}]
+
+    subject.should include("johndoe.local")
+    subject.should include("travis.local")
   end
 
   it "runs the addons even if the stage isn't specified in the config" do
@@ -44,5 +57,12 @@ describe Travis::Build::Script::Generic do
     subject
 
     should set 'SAUCE_USERNAME', 'johndoe'
+  end
+
+  it "works with addons as a list" do
+    data['config']['addons'] = [
+      { 'firefox' => '20.0' }
+    ]
+    subject.should include("Installing Firefox v20")
   end
 end
